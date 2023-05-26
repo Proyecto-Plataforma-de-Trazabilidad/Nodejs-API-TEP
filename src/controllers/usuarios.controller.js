@@ -38,12 +38,12 @@ const validarUsuario = async (req, res) => {
 
         //const queer = `Select * from usuarios where Correo='${req.body.correo}' and Contrasena=MD5('${req.body.contrasena}')`;
         //console.log(queer);
-        const result = await connection.query(`Select * from usuarios where Correo='${req.body.correo}' and Contrasena=MD5('${req.body.contrasena}')`);
+        const result = await connection.query(`SELECT IdUsuario, Idtipousuario, Nombre FROM usuarios WHERE Correo='${req.body.correo}' and Contrasena=MD5('${req.body.contrasena}')`);
         //res.json(result[0]);
         if (result[0].length === 0) {
             res.json({ error: true, mensaje: "Datos incorrectos" });
         } else {
-            res.json({ error: false, mensaje: "Datos correctos" });
+            res.json({ error: false, mensaje: "Datos correctos", datos: result[0] });
         }
 
     } catch (error) {
