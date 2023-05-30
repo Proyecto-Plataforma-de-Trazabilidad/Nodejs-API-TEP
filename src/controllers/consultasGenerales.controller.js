@@ -4,7 +4,7 @@ import { connection } from "../database/conexion.js";
 const getDistribuidores = async (req, res) => {
     try {
         const result = await connection.query("SELECT * FROM distribuidores");
-        res.json(result);
+        res.json(result[0]);
     } catch (error) {
         res.json({ error: true, mensaje: "Error al traer los datos" });
         // res.status(500);
@@ -16,7 +16,7 @@ const getDistribuidores = async (req, res) => {
 const getEmpresaDestino = async (req, res) => {
     try {
         const result = await connection.query("SELECT * FROM empresadestino");
-        res.json(result);
+        res.json(result[0]);
     } catch (error) {
         res.json({ error: true, mensaje: "Error al traer los datos" });
         // res.status(500);
@@ -28,7 +28,7 @@ const getEmpresaDestino = async (req, res) => {
 const getContenedores = async (req, res) => {
     try {
         const result = await connection.query("SELECT C.Latitud,C.Longitud,C.Origen,TC.Concepto FROM contenedores as C inner join tipocontenedor as TC on C.idTipoCont = TC.idTipoCont");
-        res.json(result);
+        res.json(result[0]);
     } catch (error) {
         res.json({ error: true, mensaje: "Error al traer los datos" });
         // res.status(500);
@@ -40,7 +40,7 @@ const getContenedores = async (req, res) => {
 const getCAT = async (req, res) => {
     try {
         const result = await connection.query("SELECT * FROM centroacopiotemporal");
-        res.json(result);
+        res.json(result[0]);
     } catch (error) {
         res.json({ error: true, mensaje: "Error al traer los datos" });
         // res.status(500);
@@ -52,7 +52,7 @@ const getCAT = async (req, res) => {
 const getERP = async (req, res) => {
     try {
         const result = await connection.query("SELECT * FROM empresarecolectoraprivada");
-        res.json(result);
+        res.json(result[0]);
     } catch (error) {
         res.json({ error: true, mensaje: "Error al traer los datos" });
         // res.status(500);
