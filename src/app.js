@@ -2,9 +2,11 @@ import express from "express";
 import morgan from "morgan";
 import config from "./config.js";
 
-// Routes
+// Routes Import 
 //import languageRoutes from "./routes/language.routes";
 import usuarioRoutes from "./routes/usuarios.routes.js";
+import consultasG from "./routes/consultasGenerares.routes.js"
+
 
 const app = express();
 
@@ -15,9 +17,9 @@ app.set("port", config.port);
 app.use(morgan("dev"));
 app.use(express.json());
 
-// Routes
-//app.use("/api/languages", languageRoutes);
-app.use("/api/usuarios", usuarioRoutes)
+// Routes en la API
+app.use("/api/usuarios", usuarioRoutes);
+app.use(consultasG);
 
 
 export default app;
