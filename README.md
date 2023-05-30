@@ -2,7 +2,7 @@
 
 ### Configuracion de las variables de entorno
 
-Crear un archivo `.env` en la reiz del directorio y añadir lo siguiente sin comillas ni punto y coma:
+Crear un archivo `.env` en la raiz del directorio y añadir lo siguiente sin comillas ni punto y coma:
 
 ```javascript
 
