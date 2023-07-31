@@ -101,6 +101,7 @@ const sendPush = (req, res) => {
     const posteo = {
         titulo: datos.titulo,
         cuerpo: datos.cuerpo,
+        url: datos.url,
     }
 
     consultarSuscripDB(datos.opcion, datos.parametros).then(suscripciones => {
