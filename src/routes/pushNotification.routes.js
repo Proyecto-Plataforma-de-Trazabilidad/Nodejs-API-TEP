@@ -3,8 +3,9 @@ import { methods as NotificacionesPush } from "../controllers/pushNotification.c
 
 const router = Router();
 
-router.get("/serviciopush/subscribe", NotificacionesPush.getSubscription);
+router.post("/serviciopush/subscribe", NotificacionesPush.postSubscription);
 router.get("/serviciopush/key", NotificacionesPush.getKey);
+router.post("/serviciopush/enviar", NotificacionesPush.sendPush);
 
 
 export default router;
