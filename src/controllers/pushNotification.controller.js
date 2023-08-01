@@ -43,6 +43,9 @@ const consultarSuscripDB = async (opc, param) => {
             case 'PorTipoUsuario':
                 quer = `SELECT S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE T.Descripcion = '${param}'`;
                 break;
+            case 'UnSoloUsuario':
+                quer = `SELECT S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE S.IdUsuario = '${param}'`;
+                break;
 
             default:
                 break;
