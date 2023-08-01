@@ -37,14 +37,14 @@ const consultarSuscripDB = async (opc, param) => {
             case 'ConsultaGeneral':
                 quer = `SELECT * FROM servicionotificaciones`;
                 break;
-            case 'SoloSuscripcion':
-                quer = `SELECT endpoint, expirationTime, Keys_p256dh, Keys_auth FROM servicionotificaciones`;
+            case 'TodosLosUsuarios':
+                quer = `SELECT IdSuscripcion, endpoint, expirationTime, Keys_p256dh, Keys_auth FROM servicionotificaciones`;
                 break;
             case 'PorTipoUsuario':
-                quer = `SELECT S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE T.Descripcion = '${param}'`;
+                quer = `SELECT S.IdSuscripcion, S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE T.Descripcion = '${param}'`;
                 break;
             case 'UnSoloUsuario':
-                quer = `SELECT S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE S.IdUsuario = '${param}'`;
+                quer = `SELECT S.IdSuscripcion, S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE S.IdUsuario = '${param}'`;
                 break;
 
             default:
@@ -56,10 +56,12 @@ const consultarSuscripDB = async (opc, param) => {
             if (rows.length > 0) {
 
                 let respuesta = rows.map(row => {
+
                     let suscripcion = {};
                     let llaves = {};
 
                     Object.entries(row).forEach(([key, value]) => {
+
                         if (key.includes('p256dh')) {
                             llaves['p256dh'] = value;
                         } else if (key.includes('auth')) {
@@ -67,12 +69,15 @@ const consultarSuscripDB = async (opc, param) => {
                         } else {
                             suscripcion[key] = value;
                         }
+
                     });
+
                     suscripcion['keys'] = llaves;
 
                     //console.log(suscripcion);
-                    return suscripcion;
-                })
+
+                    return suscripcion; //Cuando termina el map 
+                })//Fin del map 
 
                 return respuesta;
             } else
@@ -84,6 +89,28 @@ const consultarSuscripDB = async (opc, param) => {
         return (error.message);
     }
 };
+
+const borrarSuscripDB = (IdsSuscripciones) => {
+    try {
+        console.log("Borrando");
+        let queryPromises = [];
+
+        IdsSuscripciones.forEach(idSuscripcion => {
+
+            let quer = `DELETE FROM servicionotificaciones WHERE IdSuscripcion = ${idSuscripcion}`;
+            const result = connection.query(quer);
+            queryPromises.push(result);
+
+        });
+
+        Promise.all(queryPromises).then(() => {   //Se espera a que todas las promesas se resuelvan 
+            return "Se borraron los registros"
+        });
+
+    } catch (error) {
+        return (error.message);
+    }
+}
 
 const postSubscription = (req, res) => {
     const datos = req.body;
@@ -109,12 +136,40 @@ const sendPush = (req, res) => {
 
     consultarSuscripDB(datos.opcion, datos.parametros).then(suscripciones => {
 
+        let IdSuscripFallo = [];
+        let notifiacionesEnviadas = [];
+
         suscripciones.forEach((suscripcion, i) => {
-            console.log(suscripcion);
-            webpush.sendNotification(suscripcion, JSON.stringify(posteo));
+
+            let idSuscripcion = suscripcion.IdSuscripcion;
+            delete suscripcion.IdSuscripcion;
+
+            const pushProm = webpush.sendNotification(suscripcion, JSON.stringify(posteo)) //Se guardan todas las promesas en una variable
+                .catch(err => {
+                    if (err.statusCode == '410' || err.statusCode == '401') { //Si ya no existe esa suscripcion 
+                        // console.log("Fallo enviada");
+                        //console.log(err);
+                        IdSuscripFallo.push(idSuscripcion); //Se agrega al arreglo de las que fallaron 
+                    }
+
+                }); //Fin catch
+
+            notifiacionesEnviadas.push(pushProm);
+
+        }); //Fin for each
+
+
+        Promise.all(notifiacionesEnviadas).then(() => {   //Se espera a que todas las promesas de las notificaciones se resuelvan 
+            //Borrar en la base de datos todas la suscripciones que ya no existen por si id
+            if (IdSuscripFallo.length > 0) {
+                const resultado = borrarSuscripDB(IdSuscripFallo);
+                console.log(resultado);
+            }
 
         });
-        res.send("enviado");
+
+        res.send("Se enviaron todas");
+
 
     });
 
