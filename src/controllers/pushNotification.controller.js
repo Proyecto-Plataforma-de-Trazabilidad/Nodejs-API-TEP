@@ -41,10 +41,10 @@ const consultarSuscripDB = async (opc, param) => {
                 quer = `SELECT IdSuscripcion, endpoint, expirationTime, Keys_p256dh, Keys_auth FROM servicionotificaciones`;
                 break;
             case 'PorTipoUsuario':
-                quer = `SELECT S.IdSuscripcion, S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE T.Descripcion = '${param}'`;
+                quer = `SELECT S.IdSuscripcion, S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.IdTipoUsuario  = T.IdTipoUsuario  WHERE T.Concepto = '${param}'`;
                 break;
             case 'UnSoloUsuario':
-                quer = `SELECT S.IdSuscripcion, S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.Idtipousuario = T.Idtipousuario WHERE S.IdUsuario = '${param}'`;
+                quer = `SELECT S.IdSuscripcion, S.endpoint, S.expirationTime, S.Keys_p256dh, S.Keys_auth FROM servicionotificaciones AS S INNER JOIN usuarios AS U ON S.IdUsuario = U.IdUsuario INNER JOIN tipousuario AS T ON U.IdTipoUsuario  = T.IdTipoUsuario  WHERE S.IdUsuario = '${param}'`;
                 break;
 
             default:
@@ -139,37 +139,41 @@ const sendPush = (req, res) => {
         let IdSuscripFallo = [];
         let notifiacionesEnviadas = [];
 
-        suscripciones.forEach((suscripcion, i) => {
+        if (suscripciones == "no hay datos") {
+            res.send("No hay usuarios suscritos");
+        } else {
 
-            let idSuscripcion = suscripcion.IdSuscripcion;
-            delete suscripcion.IdSuscripcion;
+            suscripciones.forEach((suscripcion, i) => {
 
-            const pushProm = webpush.sendNotification(suscripcion, JSON.stringify(posteo)) //Se guardan todas las promesas en una variable
-                .catch(err => {
-                    if (err.statusCode == '410' || err.statusCode == '401') { //Si ya no existe esa suscripcion 
-                        // console.log("Fallo enviada");
-                        //console.log(err);
-                        IdSuscripFallo.push(idSuscripcion); //Se agrega al arreglo de las que fallaron 
-                    }
+                let idSuscripcion = suscripcion.IdSuscripcion;
+                delete suscripcion.IdSuscripcion;
 
-                }); //Fin catch
+                const pushProm = webpush.sendNotification(suscripcion, JSON.stringify(posteo)) //Se guardan todas las promesas en una variable
+                    .catch(err => {
+                        if (err.statusCode == '410' || err.statusCode == '401') { //Si ya no existe esa suscripcion 
+                            // console.log("Fallo enviada");
+                            //console.log(err);
+                            IdSuscripFallo.push(idSuscripcion); //Se agrega al arreglo de las que fallaron 
+                        }
 
-            notifiacionesEnviadas.push(pushProm);
+                    }); //Fin catch
 
-        }); //Fin for each
+                notifiacionesEnviadas.push(pushProm);
+
+            }); //Fin for each
 
 
-        Promise.all(notifiacionesEnviadas).then(() => {   //Se espera a que todas las promesas de las notificaciones se resuelvan 
-            //Borrar en la base de datos todas la suscripciones que ya no existen por si id
-            if (IdSuscripFallo.length > 0) {
-                const resultado = borrarSuscripDB(IdSuscripFallo);
-                console.log(resultado);
-            }
+            Promise.all(notifiacionesEnviadas).then(() => {   //Se espera a que todas las promesas de las notificaciones se resuelvan 
+                //Borrar en la base de datos todas la suscripciones que ya no existen por si id
+                if (IdSuscripFallo.length > 0) {
+                    const resultado = borrarSuscripDB(IdSuscripFallo);
+                    console.log(resultado);
+                }
 
-        });
+            });
 
-        res.send("Se enviaron todas");
-
+            res.send("Se enviaron todas");
+        }
 
     });
 
