@@ -95,8 +95,8 @@ axios.get('https://api.thecatapi.com/v1/images/search')
             url: "https://campolimpiojal.com/",
             imagen: response.data[0].url
         })
-            .then(response => {
-                console.log(response.data);
+            .then(res => {
+                console.log(res.data);
             })
             .catch(error => { console.log(error); });
 
