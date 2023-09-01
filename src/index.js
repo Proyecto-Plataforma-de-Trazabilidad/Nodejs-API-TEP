@@ -6,4 +6,4 @@ const main = () => {
 };
 
 main();
-//Ejecutar esta aplicacion con npm run dev en consola
+//Ejecutar esta aplicacion con npm run dev en consola (modo desarrollo)

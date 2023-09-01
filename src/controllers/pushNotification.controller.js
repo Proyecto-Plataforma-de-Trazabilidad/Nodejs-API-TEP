@@ -20,7 +20,7 @@ const agregarSuscripDB = async (datos) => {
         if (result.affectedRows > 0) {
             return "todoCorrecto";
         } else {
-            return "todoCorrecto";
+            return "noSePudo";
         }
 
     } catch (error) {
@@ -92,7 +92,6 @@ const consultarSuscripDB = async (opc, param) => {
 
 const borrarSuscripDB = (IdsSuscripciones) => {
     try {
-        console.log("Borrando");
         let queryPromises = [];
 
         IdsSuscripciones.forEach(idSuscripcion => {
@@ -116,7 +115,8 @@ const postSubscription = (req, res) => {
     const datos = req.body;
     console.log(datos);
     agregarSuscripDB(datos).then(result => {
-        console.log(result); res.send(result);
+        //console.log(result); 
+        res.send(result);
     });
 }
 
@@ -127,11 +127,14 @@ const getKey = (req, res) => {
 }
 
 const sendPush = (req, res) => {
+    console.log(req);
     const datos = req.body;
+
     const posteo = {
         titulo: datos.titulo,
         cuerpo: datos.cuerpo,
         url: datos.url,
+        imagen: datos.imagen,
     }
 
     consultarSuscripDB(datos.opcion, datos.parametros).then(suscripciones => {
@@ -167,7 +170,7 @@ const sendPush = (req, res) => {
                 //Borrar en la base de datos todas la suscripciones que ya no existen por si id
                 if (IdSuscripFallo.length > 0) {
                     const resultado = borrarSuscripDB(IdSuscripFallo);
-                    console.log(resultado);
+                    //console.log(resultado);
                 }
 
             });
