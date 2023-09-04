@@ -19,7 +19,7 @@ const app = express();
 
 
 //Cron Jobs (tareas automatizadas)
-let task = cron.schedule("0 8 * * 0-7", () => { //La tarea se va a ejecutar: A las 08:00 todos los días de la semana de domingo a domingo.
+let task = cron.schedule("23 10 * * *", () => { //La tarea se va a ejecutar: A las 08:00 todos los días de la semana de domingo a domingo.
     const hoy = new Date().toLocaleString();
     console.log("Ejecutando tarea calendarizada el: " + hoy);
 
@@ -32,7 +32,7 @@ let task = cron.schedule("0 8 * * 0-7", () => { //La tarea se va a ejecutar: A l
                 opcion: "PorTipoUsuario",
                 parametros: 'Amocali',
                 titulo: "Buenos Dias",
-                cuerpo: `Ya levántate HUEVON!!!`,
+                cuerpo: `Pruebas`,
                 url: "https://campolimpiojal.com/",
                 imagen: response.data[0].url
             })
@@ -97,10 +97,13 @@ let task = cron.schedule("0 8 * * 0-7", () => { //La tarea se va a ejecutar: A l
     });
 
 
-});
+},
+    {
+        scheduled: true,
+        timezone: "America/Mexico_City"
+    });
 
 Tareas.comprobarAlerta().then(datos => {
-    console.log(datos.NoAlertas);
     if (datos.NoAlertas > 0)
         task.start();
 
