@@ -55,7 +55,7 @@ const validarUsuario = async (req, res) => {
 
 
 //Consulta por usuario 
-const getUsuarioXId = async (req, res) => {
+const getUsuarioPXId = async (req, res) => {
     try {
         if (req.body.correo === undefined) {
             res.status(400).json({ message: "No mando los datos completos" });
@@ -63,7 +63,7 @@ const getUsuarioXId = async (req, res) => {
 
         //const queer = `Select * from usuarios where Correo='${req.body.correo}' and Contrasena=MD5('${req.body.contrasena}')`;
         //console.log(queer);
-        const result = await connection.query(`SELECT IdUsuario, Idtipousuario, Nombre FROM usuarios WHERE Correo='${req.body.correo}' `);
+        const result = await connection.query(`SELECT IdUsuarioPrimario, Nombre_RazonSocial FROM usuarioprimario WHERE Correo='${req.body.correo}' `);
         //res.json(result[0]);
         if (result[0].length === 0) {
             res.json({ error: true, mensaje: "No se encontraron datos" });
@@ -79,7 +79,7 @@ const getUsuarioXId = async (req, res) => {
 
 export const methods = {
     getUsuarios,
-    getUsuarioXId,
+    getUsuarioPXId,
     agregarUsuario,
     validarUsuario
 }
